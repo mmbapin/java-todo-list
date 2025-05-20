@@ -4,6 +4,9 @@ package com.mmbapin.taskmanagement.service;
 import com.mmbapin.taskmanagement.dao.TodoRepository;
 import com.mmbapin.taskmanagement.entity.Todo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,16 @@ public class TodoServiceImpl implements TodoService{
     @Override
     public List<Todo> findAll() {
         return todoRepository.findAll();
+    }
+
+    @Override
+    public Page<Todo> findAll(Pageable pageable) {
+        return todoRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Todo> findAll(Sort sort) {
+        return todoRepository.findAll(sort);
     }
 
     @Override

@@ -4,6 +4,10 @@ package com.mmbapin.taskmanagement.rest;
 import com.mmbapin.taskmanagement.entity.Todo;
 import com.mmbapin.taskmanagement.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +24,27 @@ public class TodoRestController {
 
 
     //expose "/todos" and return a list of tasks
+//    @GetMapping("/todos")
+//    public List<Todo> findAll(){
+//        return todoService.findAll();
+//    }
     @GetMapping("/todos")
-    public List<Todo> findAll(){
-        return todoService.findAll();
+    public Object findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder,
+            @RequestParam(defaultValue = "N") String allTasks
+    ){
+        if(allTasks.equalsIgnoreCase("Y")){
+            Sort sort = sortOrder.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+            return todoService.findAll(sort);
+        }else{
+            Sort.Direction sortDirection = sortOrder.equalsIgnoreCase("desc") ?
+                    Sort.Direction.DESC : Sort.Direction.ASC;
+            Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+            return todoService.findAll(pageable);
+        }
     }
 
 
