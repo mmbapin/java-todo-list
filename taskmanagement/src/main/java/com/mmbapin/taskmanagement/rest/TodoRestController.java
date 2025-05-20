@@ -53,8 +53,8 @@ public class TodoRestController {
     @GetMapping("/todos/{taskId}")
     public Todo getTask(@PathVariable int taskId){
         Todo theTask = todoService.findById(taskId);
-        if(theTask == null){
-            throw new RuntimeException("Task not found for id - " + taskId);
+        if (theTask == null) {
+            throw new TaskNotFoundException("Task not found with id: " + taskId);
         }
         return theTask;
     }
@@ -85,7 +85,7 @@ public class TodoRestController {
         Todo tempTask = todoService.findById(taskId);
 
         if(tempTask == null){
-            throw new RuntimeException("Task not found for id - " + taskId);
+            throw new TaskNotFoundException("Task not found for id - " + taskId);
         }
 
         todoService.deleteById(taskId);

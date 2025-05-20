@@ -49,7 +49,7 @@ public class TodoServiceImpl implements TodoService{
         if(result.isPresent()){
             theTask = result.get();
         }else{
-            throw new RuntimeException("Did not find task id -" + taskId);
+            return null;
         }
 
         return theTask;
