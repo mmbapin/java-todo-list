@@ -34,6 +34,11 @@ public class TodoServiceImpl implements TodoService{
     }
 
     @Override
+    public Page<Todo> findAllPaged(Pageable pageable) {
+        return todoRepository.findAll(pageable);
+    }
+
+    @Override
     public Todo findById(int id) {
         Optional<Todo> result = todoRepository.findById(id);
 
@@ -41,7 +46,7 @@ public class TodoServiceImpl implements TodoService{
         if (result.isPresent()) {
             todo = result.get();
         } else {
-            throw new RuntimeException("Did not find todo id - " + id);
+            return null;
         }
 
         return todo;

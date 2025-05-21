@@ -12,6 +12,8 @@ public interface TodoService {
 
     List<Todo> findAll(Sort sort);
 
+    Page<Todo> findAllPaged(Pageable pageable);
+
     Todo findById(int id);
 
     List<Todo> findByPersonId(int personId);

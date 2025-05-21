@@ -26,22 +26,25 @@ public class TodoRestController {
     }
 
 
-    //expose "/todos" and return a list of tasks
-//    @GetMapping("/todos")
-//    public List<Todo> findAll(){
-//        return todoService.findAll();
-//    }
     @GetMapping("/todos")
-    public List<Todo> findAll() {
-        return todoService.findAll(Sort.by(Sort.Direction.ASC, "taskName"));
+    public Page<Todo> findAllPaged(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortOrder", defaultValue = "asc") String sortOrder
+    ){
+        Sort.Direction sortDirection = sortOrder.equalsIgnoreCase("asc")? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, sortDirection, sortBy);
+        return todoService.findAllPaged(pageable);
     }
+
 
     @GetMapping("/todos/{todoId}")
     public Todo getTodo(@PathVariable int todoId) {
         Todo todo = todoService.findById(todoId);
 
         if (todo == null) {
-            throw new RuntimeException("Todo id not found - " + todoId);
+            throw new TaskNotFoundException("Todo id not found - " + todoId);
         }
 
         return todo;
