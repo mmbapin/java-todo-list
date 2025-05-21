@@ -54,7 +54,7 @@ public class TodoServiceImpl implements TodoService{
 
     @Override
     public List<Todo> findByPersonId(int personId) {
-        return todoRepository.findByPersonId(personId);
+        return todoRepository.findByPerson_Id(personId);
     }
 
     @Override
