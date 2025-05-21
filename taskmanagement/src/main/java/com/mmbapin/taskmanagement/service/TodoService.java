@@ -10,13 +10,13 @@ import java.util.List;
 public interface TodoService {
     List<Todo> findAll();
 
-    Page<Todo> findAll(Pageable pageable);
-
     List<Todo> findAll(Sort sort);
 
-    Todo findById(int taskId);
+    Todo findById(int id);
 
-    Todo save(Todo theTask);
+    List<Todo> findByPersonId(int personId);
 
-    void deleteById(int taskId);
+    Todo save(Todo todo);
+
+    void deleteById(int id);
 }

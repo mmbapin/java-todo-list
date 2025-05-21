@@ -1,7 +1,7 @@
 package com.mmbapin.taskmanagement.service;
 
 
-import com.mmbapin.taskmanagement.dao.TodoRepository;
+import com.mmbapin.taskmanagement.repository.TodoRepository;
 import com.mmbapin.taskmanagement.entity.Todo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,7 +10,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,19 +19,13 @@ public class TodoServiceImpl implements TodoService{
     private TodoRepository todoRepository;
 
     @Autowired
-    public TodoServiceImpl(TodoRepository theTodoRepository) {
-        this.todoRepository = theTodoRepository;
+    public TodoServiceImpl(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
     }
-
 
     @Override
     public List<Todo> findAll() {
         return todoRepository.findAll();
-    }
-
-    @Override
-    public Page<Todo> findAll(Pageable pageable) {
-        return todoRepository.findAll(pageable);
     }
 
     @Override
@@ -41,30 +34,31 @@ public class TodoServiceImpl implements TodoService{
     }
 
     @Override
-    public Todo findById(int taskId) {
-        Optional<Todo> result = todoRepository.findById(taskId);
+    public Todo findById(int id) {
+        Optional<Todo> result = todoRepository.findById(id);
 
-        Todo theTask = null;
-
-        if(result.isPresent()){
-            theTask = result.get();
-        }else{
-            return null;
+        Todo todo = null;
+        if (result.isPresent()) {
+            todo = result.get();
+        } else {
+            throw new RuntimeException("Did not find todo id - " + id);
         }
 
-        return theTask;
+        return todo;
     }
 
-    @Transactional
     @Override
-    public Todo save(Todo theTask) {
-        return todoRepository.save(theTask);
+    public List<Todo> findByPersonId(int personId) {
+        return todoRepository.findByPersonId(personId);
     }
 
-
-    @Transactional
     @Override
-    public void deleteById(int taskId) {
-        todoRepository.deleteById(taskId);
+    public Todo save(Todo todo) {
+        return todoRepository.save(todo);
+    }
+
+    @Override
+    public void deleteById(int id) {
+        todoRepository.deleteById(id);
     }
 }

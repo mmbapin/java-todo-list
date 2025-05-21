@@ -1,5 +1,6 @@
 package com.mmbapin.taskmanagement.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 
@@ -8,7 +9,6 @@ import jakarta.persistence.*;
 public class Todo {
 
     //define fields
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
@@ -17,24 +17,35 @@ public class Todo {
     @Column(name="task_name")
     private String taskName;
 
-    @Column(name="assign_person_name")
-    private String assignPersonName;
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+            CascadeType.DETACH, CascadeType.REFRESH})
+    @JoinColumn(name="person_id")
+    @JsonIgnoreProperties("todos") // Prevents infinite recursion in JSON
+    private Person person;
 
     @Column(name="status")
     private String status;
 
+    // Transient field to maintain backward compatibility
+    @Transient
+    private String assignPersonName;
+
     //define constructor
     public Todo() {}
 
+    public Todo(String taskName, String status) {
+        this.taskName = taskName;
+        this.status = status;
+    }
+
+    // Constructor for backward compatibility
     public Todo(String taskName, String assignPersonName, String status) {
         this.taskName = taskName;
         this.assignPersonName = assignPersonName;
         this.status = status;
     }
 
-
     //define getter/setter
-
     public int getId() {
         return id;
     }
@@ -51,12 +62,12 @@ public class Todo {
         this.taskName = taskName;
     }
 
-    public String getAssignPersonName() {
-        return assignPersonName;
+    public Person getPerson() {
+        return person;
     }
 
-    public void setAssignPersonName(String assignPersonName) {
-        this.assignPersonName = assignPersonName;
+    public void setPerson(Person person) {
+        this.person = person;
     }
 
     public String getStatus() {
@@ -67,16 +78,25 @@ public class Todo {
         this.status = status;
     }
 
+    // Getter and setter for backward compatibility
+    public String getAssignPersonName() {
+        return person != null ? person.getName() : assignPersonName;
+    }
 
-    //define toString
+    public void setAssignPersonName(String assignPersonName) {
+        this.assignPersonName = assignPersonName;
+    }
 
     @Override
     public String toString() {
         return "Todo{" +
                 "id=" + id +
                 ", taskName='" + taskName + '\'' +
-                ", assignPersonName='" + assignPersonName + '\'' +
+                ", person=" + (person != null ? person.getName() : "null") +
                 ", status='" + status + '\'' +
                 '}';
     }
 }
+
+
+

@@ -1,7 +1,9 @@
 package com.mmbapin.taskmanagement.rest;
 
 
+import com.mmbapin.taskmanagement.entity.Person;
 import com.mmbapin.taskmanagement.entity.Todo;
+import com.mmbapin.taskmanagement.service.PersonService;
 import com.mmbapin.taskmanagement.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,9 +18,10 @@ import java.util.List;
 @RequestMapping("/api")
 public class TodoRestController {
     private TodoService todoService;
+    private PersonService personService;
 
     @Autowired
-    public TodoRestController(TodoService todoService) {
+    public TodoRestController(TodoService todoService, PersonService personService) {
         this.todoService = todoService;
     }
 
@@ -29,70 +32,57 @@ public class TodoRestController {
 //        return todoService.findAll();
 //    }
     @GetMapping("/todos")
-    public Object findAll(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortOrder,
-            @RequestParam(defaultValue = "N") String allTasks
-    ){
-        if(allTasks.equalsIgnoreCase("Y")){
-            Sort sort = sortOrder.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            return todoService.findAll(sort);
-        }else{
-            Sort.Direction sortDirection = sortOrder.equalsIgnoreCase("desc") ?
-                    Sort.Direction.DESC : Sort.Direction.ASC;
-            Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
-            return todoService.findAll(pageable);
-        }
+    public List<Todo> findAll() {
+        return todoService.findAll(Sort.by(Sort.Direction.ASC, "taskName"));
     }
 
+    @GetMapping("/todos/{todoId}")
+    public Todo getTodo(@PathVariable int todoId) {
+        Todo todo = todoService.findById(todoId);
 
-
-    //add mapping for GET /todos/{taskId}
-    @GetMapping("/todos/{taskId}")
-    public Todo getTask(@PathVariable int taskId){
-        Todo theTask = todoService.findById(taskId);
-        if (theTask == null) {
-            throw new TaskNotFoundException("Task not found with id: " + taskId);
+        if (todo == null) {
+            throw new RuntimeException("Todo id not found - " + todoId);
         }
-        return theTask;
+
+        return todo;
     }
 
+    @GetMapping("/persons/{personId}/todos")
+    public List<Todo> getTodosByPersonId(@PathVariable int personId) {
+        return todoService.findByPersonId(personId);
+    }
 
-    //add mapping for POST /todos - add new task
     @PostMapping("/todos")
-    public Todo addTasks(@RequestBody Todo theTask){
-        theTask.setId(0);
+    public Todo addTodo(@RequestBody Todo todo) {
+        // Set id to 0 to force a save of new item instead of update
+        todo.setId(0);
 
-        Todo dbTask = todoService.save(theTask);
-
-        return dbTask;
+        return todoService.save(todo);
     }
 
+    @PostMapping("/persons/{personId}/todos")
+    public Todo addTodoForPerson(@PathVariable int personId, @RequestBody Todo todo) {
+        // Set id to 0 to force a save of new item instead of update
+        todo.setId(0);
 
-    //add mapping for PUT /todos - update existing task
+        // Get the person and associate with todo
+        Person person = personService.findById(personId);
+        todo.setPerson(person);
+
+        return todoService.save(todo);
+    }
+
     @PutMapping("/todos")
-    public Todo updateTask(@RequestBody Todo theTask){
-        Todo dbTask = todoService.save(theTask);
-        return dbTask;
+    public Todo updateTodo(@RequestBody Todo todo) {
+        return todoService.save(todo);
     }
 
+    @PutMapping("/todos/{todoId}/person/{personId}")
+    public Todo assignPersonToTodo(@PathVariable int todoId, @PathVariable int personId) {
+        Todo todo = todoService.findById(todoId);
+        Person person = personService.findById(personId);
 
-    //add mapping for DELETE /todos/{taskId} - delete task
-    @DeleteMapping("/todos/{taskId}")
-    public String deleteTask(@PathVariable int taskId){
-        Todo tempTask = todoService.findById(taskId);
-
-        if(tempTask == null){
-            throw new TaskNotFoundException("Task not found for id - " + taskId);
-        }
-
-        todoService.deleteById(taskId);
-        return "Deleted employee with id - " + taskId;
+        todo.setPerson(person);
+        return todoService.save(todo);
     }
-
-
-
-
 }
