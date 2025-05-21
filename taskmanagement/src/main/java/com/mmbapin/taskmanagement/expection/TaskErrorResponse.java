@@ -1,4 +1,4 @@
-package com.mmbapin.taskmanagement.rest;
+package com.mmbapin.taskmanagement.expection;
 
 public class TaskErrorResponse {
     private int status;
