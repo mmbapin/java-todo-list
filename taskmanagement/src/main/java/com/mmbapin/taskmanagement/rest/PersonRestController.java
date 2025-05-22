@@ -4,6 +4,10 @@ package com.mmbapin.taskmanagement.rest;
 import com.mmbapin.taskmanagement.entity.Person;
 import com.mmbapin.taskmanagement.expection.TaskNotFoundException;
 import com.mmbapin.taskmanagement.service.PersonService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +25,15 @@ public class PersonRestController {
 
     //Get All Persons
     @GetMapping()
-    public List<Person> getAllPersons() {
-        return personService.findAll();
+    public Page<Person> getAllPersons(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "id") String sortBy,
+            @RequestParam(value = "sortOrder", defaultValue = "asc") String sortOrder
+    ) {
+        Sort.Direction sortDirection = sortOrder.equalsIgnoreCase("asc")? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, sortDirection, sortBy);
+        return personService.findAllPaged(pageable);
     }
 
     // Get a person by ID
@@ -40,6 +51,7 @@ public class PersonRestController {
     // Create a new person
     @PostMapping()
     public Person createPerson(@RequestBody Person person) {
+        System.out.println("Creating new person: " + person);
         return personService.save(person);
     }
 
@@ -53,7 +65,7 @@ public class PersonRestController {
             throw new TaskNotFoundException("Person not found");
         }
 
-//        updatedPerson.setId(id);
+        updatedPerson.setId(id);
         return personService.save(updatedPerson);
     }
 

@@ -318,8 +318,9 @@ export class HomeComponent implements OnInit {
   }
   
   loadStats(): void {
-    this.personService.getPersons(0, 1).subscribe({
-      next: (response: PersonResponse) => {
+    this.personService.getPersons(0, 10).subscribe({
+      next: (response: any) => {
+        console.log('Person stats loaded', response);
         this.personCount = response.totalElements;
       },
       error: (error) => {

@@ -57,7 +57,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
               </thead>
               <tbody>
                 <tr *ngFor="let person of persons; let i = index" class="slide-in-up" [style.animation-delay.ms]="i * 50">
-                  <td>{{ person.firstName }} {{ person.lastName }}</td>
+                  <td>{{ person.name }}</td>
                   <td>{{ person.email }}</td>
                   <td>{{ person.phone || '-' }}</td>
                   <td class="actions">

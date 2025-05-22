@@ -186,6 +186,7 @@ export class PersonFormComponent implements OnInit {
 
 		// Get the personId from the route if in edit mode
 		const id = this.route.snapshot.paramMap.get('id');
+		console.log('id', id);
 		if (id !== null && id !== 'new') {
 			this.isEditMode = true;
 			this.personId = +id;
@@ -242,7 +243,7 @@ export class PersonFormComponent implements OnInit {
 			email: personData.email,
 			phone: personData.phone || '',
 		};
-		this.personService.createPerson(personData).subscribe({
+		this.personService.createPerson(payload).subscribe({
 			next: (createdPerson) => {
 				this.saving = false;
 				this.router.navigate(['/persons', createdPerson.id], {
@@ -259,8 +260,14 @@ export class PersonFormComponent implements OnInit {
 
 	updatePerson(personData: Person): void {
 		if (!this.personId) return;
+		
+		const payload = {
+			id: this.personId,
+			...personData
+		};
+		console.log('Updating person with ID:', payload);
 
-		this.personService.updatePerson(this.personId, personData).subscribe({
+		this.personService.updatePerson(this.personId, payload).subscribe({
 			next: (updatedPerson) => {
 				this.saving = false;
 				this.router.navigate(['/persons', updatedPerson.id], {
