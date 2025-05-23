@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../../../core/services/task.service';
 import { PersonService } from '../../../../core/services/person.service';
 import { Task, TaskPriority, TaskStatus } from '../../../../core/models/task.model';
-import { Person } from '../../../../core/models/person.model';
+import {Person, PersonResponse} from '../../../../core/models/person.model';
 import { AlertComponent } from '../../../../shared/components/alert/alert.component';
 
 @Component({
@@ -241,18 +241,42 @@ export class TaskFormComponent implements OnInit {
       this.isEditMode = true;
       this.taskId = +id;
       this.loadTask();
-    } else {
+    }
+    // else {
+    //   // Check if personId is provided in query params (for assigning task directly)
+    //   this.route.queryParams.subscribe(params => {
+    //     console.log("New task ID: ", params);
+    //     if (params['personId']) {
+    //       this.taskForm.patchValue({
+    //         personId: +params['personId']
+    //       });
+    //     }
+    //   });
+    //
+    //   this.loading = false;
+    // }
+  }
+
+  handlePersonIdFromRoute(person: any): void {
       // Check if personId is provided in query params (for assigning task directly)
       this.route.queryParams.subscribe(params => {
+        console.log("New task ID: ", params);
         if (params['personId']) {
+          const selectedPerson: any = this.persons.find(person => person.id === +params['personId']);
+          const person: any = {
+            name: selectedPerson.name,
+            id: selectedPerson.id,
+            email: selectedPerson.email,
+            phone: selectedPerson.phone
+          }
+          console.log("Person: ", person);
           this.taskForm.patchValue({
-            personId: +params['personId']
+            assignPersonName: selectedPerson.name,
+            person: person
           });
+          this.loading = false;
         }
       });
-      
-      this.loading = false;
-    }
   }
 
   handleSelect(event: Event): void {
@@ -284,6 +308,7 @@ export class TaskFormComponent implements OnInit {
       next: (response) => {
         console.log('Persons loaded:', response);
         this.persons = response.content;
+        this.handlePersonIdFromRoute(this.persons);
       },
       error: (error) => {
         console.error('Error loading persons', error);
@@ -303,6 +328,7 @@ export class TaskFormComponent implements OnInit {
           ...task,
           dueDate: task.dueDate ? this.formatDateForInput(task.dueDate) : ''
         };
+        console.log('Formatted Task:', formattedTask);
         
         this.taskForm.patchValue(formattedTask);
         this.loading = false;
