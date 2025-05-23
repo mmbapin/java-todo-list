@@ -88,12 +88,12 @@ import { PersonResponse } from '../../core/models/person.model';
                  class="recent-item slide-in-up" 
                  [style.animation-delay.ms]="i * 50">
               <div class="recent-item-header">
-                <a [routerLink]="['/tasks', task.id]" class="recent-item-title">{{ task.title }}</a>
+                <a [routerLink]="['/tasks', task.id]" class="recent-item-title">{{ task.taskName }}</a>
                 <span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
               </div>
               <div class="recent-item-meta">
-                <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span>
-                <span *ngIf="task.personName">Assigned to: {{ task.personName }}</span>
+                <!-- <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span> -->
+                <span *ngIf="task.assignPersonName">Assigned to: {{ task.assignPersonName }}</span>
               </div>
             </div>
           </div>
@@ -329,17 +329,17 @@ export class HomeComponent implements OnInit {
     });
     
     this.taskService.getTasks(0, 100).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.taskCount = response.totalElements;
         
         // Calculate task stats
         if (response.content && response.content.length > 0) {
-          this.pendingTaskCount = response.content.filter(task => 
-            task.status === 'TODO' || task.status === 'IN_PROGRESS'
+          this.pendingTaskCount = response.content.filter((task: any) => 
+            task.status === 'To Do' || task.status === 'Pending'
           ).length;
           
-          this.completedTaskCount = response.content.filter(task => 
-            task.status === 'COMPLETED'
+          this.completedTaskCount = response.content.filter((task: any) => 
+            task.status === 'Done'
           ).length;
         }
       },
@@ -354,6 +354,7 @@ export class HomeComponent implements OnInit {
     
     this.taskService.getTasks(0, 5).subscribe({
       next: (response) => {
+        console.log('Recent tasks loaded', response);
         this.recentTasks = response.content;
         this.loadingTasks = false;
       },

@@ -8,7 +8,9 @@ import { Task, TaskResponse } from '../models/task.model';
 })
 export class TaskService {
   private apiUrl = 'http://localhost:8080/api/todos';
+  private apiUrl_task = 'http://localhost:8080/api';
 
+  // /persons/{personId}/todos
   constructor(private http: HttpClient) {}
 
   getTasks(page: number = 0, size: number = 10): Observable<TaskResponse> {
@@ -24,11 +26,12 @@ export class TaskService {
   }
 
   createTask(task: Omit<Task, 'id'>): Observable<Task> {
+    console.log('Creating task:', task);
     return this.http.post<Task>(this.apiUrl, task);
   }
 
   updateTask(id: number, task: Omit<Task, 'id'>): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${id}`, task);
+    return this.http.put<Task>(`${this.apiUrl}`, task);
   }
 
   deleteTask(id: number): Observable<void> {
@@ -36,6 +39,6 @@ export class TaskService {
   }
 
   getTasksByPerson(personId: number): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/person/${personId}`);
+    return this.http.get<Task[]>(`${this.apiUrl_task}/persons/${personId}/todos`);
   }
 }

@@ -43,10 +43,10 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                 <select id="statusFilter" class="form-control form-control-sm" 
                   (change)="onStatusFilterChange($event)">
                   <option value="ALL">All Statuses</option>
-                  <option value="TODO">To Do</option>
-                  <option value="IN_PROGRESS">In Progress</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
+                  <option value="To Do">To Do</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Done">Completed</option>
+                  <option value="Cancel">Cancelled</option>
                 </select>
               </div>
             </div>
@@ -65,17 +65,17 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
             <div *ngFor="let task of tasks; let i = index" class="task-card slide-in-up" [style.animation-delay.ms]="i * 50">
               <div class="task-card-header">
                 <span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
-                <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span>
+                <!-- <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span> -->
               </div>
               <h3 class="task-title">
-                <a [routerLink]="['/tasks', task.id]">{{ task.title }}</a>
+                <a [routerLink]="['/tasks', task.id]">{{ task.taskName }}</a>
               </h3>
               <p *ngIf="task.description" class="task-description">{{ 
                 task.description.length > 80 ? task.description.substring(0, 80) + '...' : task.description 
               }}</p>
               <div class="task-meta">
-                <div *ngIf="task.personName" class="task-assignee">
-                  <strong>Assigned to:</strong> {{ task.personName }}
+                <div *ngIf="task.assignPersonName" class="task-assignee">
+                  <strong>Assigned to:</strong> {{ task.assignPersonName }}
                 </div>
                 <div *ngIf="task.dueDate" class="task-due-date" [class.overdue]="isOverdue(task.dueDate)">
                   <strong>Due:</strong> {{ task.dueDate | date:'mediumDate' }}
@@ -257,6 +257,7 @@ export class TaskListComponent implements OnInit {
     
     this.taskService.getTasks(this.currentPage, this.pageSize).subscribe({
       next: (response: TaskResponse) => {
+        console.log('Tasks loaded:', response);
         this.tasks = response.content;
         this.totalPages = response.totalPages;
         this.totalElements = response.totalElements;
@@ -289,6 +290,7 @@ export class TaskListComponent implements OnInit {
   }
   
   confirmDelete(task: Task): void {
+    console.log('Confirm delete task:', task);
     this.taskToDelete = task;
     this.showDeleteDialog = true;
   }
@@ -302,7 +304,7 @@ export class TaskListComponent implements OnInit {
     if (!this.taskToDelete || !this.taskToDelete.id) return;
     
     const taskId = this.taskToDelete.id;
-    const taskTitle = this.taskToDelete.title;
+    const taskTitle = this.taskToDelete.taskName;
     
     this.taskService.deleteTask(taskId).subscribe({
       next: () => {

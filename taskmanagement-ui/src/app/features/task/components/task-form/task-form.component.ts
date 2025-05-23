@@ -35,22 +35,22 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
           
           <form *ngIf="!loading" [formGroup]="taskForm" (ngSubmit)="onSubmit()">
             <div class="form-group">
-              <label for="title">Task Title *</label>
+              <label for="taskName">Task Title *</label>
               <input 
                 type="text" 
-                id="title" 
-                formControlName="title" 
+                id="taskName" 
+                formControlName="taskName" 
                 class="form-control" 
-                [class.is-invalid]="isInvalid('title')"
+                [class.is-invalid]="isInvalid('taskName')"
               >
-              <div *ngIf="isInvalid('title')" class="error-message">
-                <span *ngIf="taskForm.get('title')?.errors?.['required']">
-                  Task title is required.
+              <div *ngIf="isInvalid('taskName')" class="error-message">
+                <span *ngIf="taskForm.get('taskName')?.errors?.['required']">
+                  Task taskName is required.
                 </span>
               </div>
             </div>
             
-            <div class="form-group">
+            <!-- <div class="form-group">
               <label for="description">Description</label>
               <textarea 
                 id="description" 
@@ -59,7 +59,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                 rows="3"
                 placeholder="Optional"
               ></textarea>
-            </div>
+            </div> -->
             
             <div class="form-row">
               <div class="form-group">
@@ -70,10 +70,11 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                   class="form-control" 
                   [class.is-invalid]="isInvalid('status')"
                 >
-                  <option [value]="TaskStatus.TODO">To Do</option>
-                  <option [value]="TaskStatus.IN_PROGRESS">In Progress</option>
-                  <option [value]="TaskStatus.COMPLETED">Completed</option>
-                  <option [value]="TaskStatus.CANCELLED">Cancelled</option>
+                  <option [value]="'To Do'">To Do</option>
+                  <option [value]="'Pending'">In Progress</option>
+                  <option [value]="'Done'">Completed</option>
+                  <option [value]="'COMPLETED'">Completed</option>
+                  <!-- <option [value]="TaskStatus.CANCELLED">Cancelled</option> -->
                 </select>
                 <div *ngIf="isInvalid('status')" class="error-message">
                   <span *ngIf="taskForm.get('status')?.errors?.['required']">
@@ -82,7 +83,7 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                 </div>
               </div>
               
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="priority">Priority *</label>
                 <select 
                   id="priority" 
@@ -100,11 +101,11 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                     Priority is required.
                   </span>
                 </div>
-              </div>
+              </div> -->
             </div>
             
             <div class="form-row">
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label for="dueDate">Due Date</label>
                 <input 
                   type="date" 
@@ -112,18 +113,19 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                   formControlName="dueDate" 
                   class="form-control"
                 >
-              </div>
+              </div> -->
               
               <div class="form-group">
-                <label for="personId">Assign To</label>
+                <label for="assignPersonName">Assign To</label>
                 <select 
-                  id="personId" 
-                  formControlName="personId" 
+                  id="assignPersonName" 
+                  formControlName="assignPersonName" 
                   class="form-control"
+                  (change)="handleSelect($event)"
                 >
                   <option [value]="null">-- Unassigned --</option>
-                  <option *ngFor="let person of persons" [value]="person.id">
-                    {{ person.firstName }} {{ person.lastName }}
+                  <option *ngFor="let person of persons" [value]="person.name">
+                    {{ person.name }}
                   </option>
                 </select>
               </div>
@@ -252,21 +254,35 @@ export class TaskFormComponent implements OnInit {
       this.loading = false;
     }
   }
+
+  handleSelect(event: Event): void {
+    // alert('Selected');
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedValue = selectElement.value;
+    const selectedPerson = this.persons.find(person => person.name === selectedValue);
+    if (selectedPerson) {
+      this.taskForm.patchValue({
+        person: selectedPerson
+      });
+    }
+  }
   
   initForm(): void {
     this.taskForm = this.fb.group({
-      title: ['', [Validators.required]],
-      description: [''],
+      taskName: ['', [Validators.required]],
+      // description: [''],
       status: [TaskStatus.TODO, [Validators.required]],
-      priority: [TaskPriority.MEDIUM, [Validators.required]],
-      dueDate: [''],
-      personId: [null]
+      // priority: [TaskPriority.MEDIUM, [Validators.required]],
+      // dueDate: [''],
+      person: [null],
+      assignPersonName: [''],
     });
   }
   
   loadPersons(): void {
     this.personService.getPersons(0, 100).subscribe({
       next: (response) => {
+        console.log('Persons loaded:', response);
         this.persons = response.content;
       },
       error: (error) => {
@@ -281,6 +297,7 @@ export class TaskFormComponent implements OnInit {
     
     this.taskService.getTask(this.taskId).subscribe({
       next: (task: Task) => {
+        console.log('Task loaded:', task);
         // Format the date to YYYY-MM-DD for the date input
         const formattedTask = {
           ...task,
@@ -303,6 +320,8 @@ export class TaskFormComponent implements OnInit {
     
     this.saving = true;
     const taskData = this.prepareTaskData();
+
+    console.log('Task Data:', taskData);
     
     if (this.isEditMode && this.taskId) {
       this.updateTask(taskData);
@@ -314,16 +333,18 @@ export class TaskFormComponent implements OnInit {
   prepareTaskData(): Omit<Task, 'id'> {
     const formValue = this.taskForm.value;
     
-    // Handle empty string for dueDate
-    const dueDate = formValue.dueDate ? formValue.dueDate : null;
-    
-    // Handle empty string or null for personId
-    const personId = formValue.personId ? +formValue.personId : null;
-    
+    // Create a new person object without todos if person exists
+    const cleanedPerson = formValue.person ? {
+      id: formValue.person.id,
+      name: formValue.person.name,
+      email: formValue.person.email,
+      phone: formValue.person.phone,
+    } : null;
+    // delete cleanedPerson.person.todos;
     return {
+      id: this.taskId || 0,
       ...formValue,
-      dueDate,
-      personId
+      person: cleanedPerson
     };
   }
   

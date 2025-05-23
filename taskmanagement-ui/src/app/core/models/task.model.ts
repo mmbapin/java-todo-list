@@ -1,12 +1,15 @@
 export interface Task {
   id?: number;
   title: string;
+  name?: string; // For display purposes
+  taskName?: string; // For display purposes
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
   dueDate?: string;
   personId?: number;
   personName?: string; // For display purposes
+  assignPersonName?: string; // For display purposes
   createdAt?: string;
   updatedAt?: string;
 }

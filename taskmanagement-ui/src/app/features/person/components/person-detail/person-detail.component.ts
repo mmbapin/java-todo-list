@@ -113,12 +113,14 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
 								[style.animation-delay.ms]="i * 50"
 							>
 								<div class="task-header">
-									<a [routerLink]="['/tasks', task.id]" class="task-title">{{ task.title }}</a>
-									<span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
+									<a [routerLink]="['/tasks', task.id]" class="task-title">{{ task.taskName }}</a>
+									<!-- <span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span> -->
+									 <span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
 								</div>
 								<p *ngIf="task.description" class="task-description">{{ task.description }}</p>
 								<div class="task-footer">
-									<span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span>
+									<span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
+									<!-- <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span> -->
 									<span *ngIf="task.dueDate" class="task-due-date">
 										Due: {{ task.dueDate | date : 'mediumDate' }}
 									</span>
@@ -340,6 +342,7 @@ export class PersonDetailComponent implements OnInit {
 
 		this.taskService.getTasksByPerson(this.personId).subscribe({
 			next: (tasks: Task[]) => {
+				console.log('Tasks loaded:', tasks);
 				this.tasks = tasks;
 				this.loadingTasks = false;
 			},

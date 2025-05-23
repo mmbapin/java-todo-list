@@ -45,32 +45,33 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
           
           <div *ngIf="!loading && task" class="task-details">
             <div class="task-header">
-              <div class="task-badges">
-                <span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
-                <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span>
-                <span *ngIf="task.dueDate" [class]="'badge ' + (isOverdue(task.dueDate) ? 'badge-error' : 'badge-secondary')">
-                  Due: {{ task.dueDate | date:'mediumDate' }}
-                </span>
-              </div>
+              <h2>{{ task.taskName }}</h2>
             </div>
             
-            <div class="detail-section">
+            <!-- <div class="detail-section">
               <h2>Description</h2>
               <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
               <p *ngIf="!task.description" class="text-muted">No description provided.</p>
-            </div>
+            </div> -->
             
             <div class="detail-section">
               <h2>Details</h2>
               <div class="detail-grid">
                 <div class="detail-item">
                   <strong>Status:</strong>
-                  <span [class]="'text-' + getStatusClass(task.status)">{{ task.status }}</span>
+                  <!-- <span [class]="'text-' + getStatusClass(task.status)">{{ task.status }}</span> -->
+                  <div class="task-badges">
+                    <span [class]="'badge badge-' + getStatusClass(task.status)">{{ task.status }}</span>
+                    <!-- <span [class]="'badge badge-' + getPriorityClass(task.priority)">{{ task.priority }}</span> -->
+                    <span *ngIf="task.dueDate" [class]="'badge ' + (isOverdue(task.dueDate) ? 'badge-error' : 'badge-secondary')">
+                      Due: {{ task.dueDate | date:'mediumDate' }}
+                    </span>
+                  </div>
                 </div>
-                <div class="detail-item">
+                <!-- <div class="detail-item">
                   <strong>Priority:</strong>
                   <span [class]="'text-' + getPriorityClass(task.priority)">{{ task.priority }}</span>
-                </div>
+                </div> -->
                 <div class="detail-item">
                   <strong>Due Date:</strong>
                   <span [class.text-error]="task.dueDate && isOverdue(task.dueDate)">
@@ -79,10 +80,10 @@ import { AlertComponent } from '../../../../shared/components/alert/alert.compon
                 </div>
                 <div class="detail-item">
                   <strong>Assigned To:</strong>
-                  <span *ngIf="task.personId && task.personName">
-                    <a [routerLink]="['/persons', task.personId]">{{ task.personName }}</a>
+                  <span *ngIf="task.id && task.name">
+                    <a [routerLink]="['/persons', task.id]">{{ task.name }}</a>
                   </span>
-                  <span *ngIf="!task.personId">Unassigned</span>
+                  <span *ngIf="!task.id">Unassigned</span>
                 </div>
                 <div class="detail-item" *ngIf="task.createdAt">
                   <strong>Created:</strong>

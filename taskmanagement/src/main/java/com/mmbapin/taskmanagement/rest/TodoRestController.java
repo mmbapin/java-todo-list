@@ -25,6 +25,7 @@ public class TodoRestController {
     @Autowired
     public TodoRestController(TodoService todoService, PersonService personService) {
         this.todoService = todoService;
+        this.personService = personService;
     }
 
 
@@ -62,6 +63,22 @@ public class TodoRestController {
         // Set id to 0 to force a save of new item instead of update
         todo.setId(0);
 
+        // Handle the Person relationship
+        if (todo.getPerson() != null && todo.getPerson().getId() > 0) {
+            int personId = todo.getPerson().getId();
+            Person person = personService.findById(personId);
+
+            if (person == null) {
+                throw new TaskNotFoundException("Person id not found - " + personId);
+            }
+
+            // Replace the detached Person with the managed one
+            todo.setPerson(person);
+        } else {
+            // If no valid person provided, set to null to avoid JPA issues
+            todo.setPerson(null);
+        }
+
         return todoService.save(todo);
     }
 
@@ -89,5 +106,16 @@ public class TodoRestController {
 
         todo.setPerson(person);
         return todoService.save(todo);
+    }
+
+
+    @DeleteMapping("/todos/{todoId}")
+    public void deleteTodo(@PathVariable int todoId) {
+        Todo todo = todoService.findById(todoId);
+        if (todo == null) {
+            throw new TaskNotFoundException("Todo id not found - " + todoId);
+        }
+
+        todoService.deleteById(todoId);
     }
 }
